@@ -35,6 +35,12 @@ const transferSol = async() => {
     // Get Keypair from Secret Key
     var from = Keypair.fromSecretKey(DEMO_FROM_SECRET_KEY);
 
+    // wallet balance before airdropping in "from" account
+    const walletBalanceFrom = await connection.getBalance(
+        new PublicKey(from.publicKey)
+    );
+    console.log(`From's Wallet balance before: ${parseInt(walletBalanceFrom) / LAMPORTS_PER_SOL} SOL`);
+
     // Other things to try: 
     // 1) Form array from userSecretKey
     // const from = Keypair.fromSecretKey(Uint8Array.from(userSecretKey));
@@ -43,6 +49,12 @@ const transferSol = async() => {
 
     // Generate another Keypair (account we'll be sending to)
     const to = Keypair.generate();
+
+    // wallet balance before airdropping in "to" account
+    const walletBalanceTo = await connection.getBalance(
+        new PublicKey(to.publicKey)
+    );
+    console.log(`To's Wallet balance before: ${parseInt(walletBalanceTo) / LAMPORTS_PER_SOL} SOL`);
 
     // Aidrop 2 SOL to Sender wallet
     console.log("Airdopping some SOL to Sender wallet!");
@@ -64,12 +76,22 @@ const transferSol = async() => {
 
     console.log("Airdrop completed for the Sender account");
 
+    // wallet balance after airdropping in "from" account
+    const walletBalanceFromAfter = await connection.getBalance(
+        new PublicKey(from.publicKey)
+    );
+
+    console.log(walletBalanceFromAfter)
+    console.log(`From's Wallet balance after: ${parseInt(walletBalanceFromAfter) / LAMPORTS_PER_SOL} SOL`);
+
+    const transferAmount = parseInt(walletBalanceFromAfter * 50 / 100)
+
     // Send money from "from" wallet and into "to" wallet
     var transaction = new Transaction().add(
         SystemProgram.transfer({
             fromPubkey: from.publicKey,
             toPubkey: to.publicKey,
-            lamports: LAMPORTS_PER_SOL / 100
+            lamports: transferAmount
         })
     );
 
@@ -80,6 +102,12 @@ const transferSol = async() => {
         [from]
     );
     console.log('Signature is', signature);
+
+    // wallet balance after airdropping in "to" account
+    const walletBalanceToAfter = await connection.getBalance(
+        new PublicKey(to.publicKey)
+    );
+    console.log(`To's Wallet balance after: ${parseInt(walletBalanceToAfter) / LAMPORTS_PER_SOL} SOL`);
 }
 
 transferSol();
